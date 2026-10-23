@@ -1,6 +1,6 @@
 namespace Domain.Entities;
 
-public class Task
+public class Activity
 {
     public Guid Id { get; } = Guid.NewGuid();
     public string Name { get; set; }
@@ -10,7 +10,7 @@ public class Task
     public TimeOnly EndTime { get; set; }
     public bool IsCompleted { get; set; } = false;
 
-    public Task(
+    public Activity(
         string name,
         DateOnly date,
         TimeOnly startTime,
