@@ -28,9 +28,9 @@ public sealed class ActivitiesController(
     }
 
     [HttpGet("{activityId}", Name = "GetActivityById")]
-    public async Task<IActionResult> GetActivityById(Guid id)
+    public async Task<IActionResult> GetActivityById(Guid activityId)
     {
-        var activity = await getActivityByIdUseCase.ExecuteAsync(id);
+        var activity = await getActivityByIdUseCase.ExecuteAsync(activityId);
         return Ok(activity);
     }
 }
