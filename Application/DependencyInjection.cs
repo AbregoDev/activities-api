@@ -1,5 +1,7 @@
 using Application.Activities.Createactivity;
+using Application.Activities.DeleteActivity;
 using Application.Activities.GetActivity;
+using Application.Activities.UpdateActivity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
@@ -11,6 +13,8 @@ public static class DependencyInjection
         services.AddScoped<CreateActivityUseCase>();
         services.AddScoped<GetActivitiesUseCase>();
         services.AddScoped<GetActivityByIdUseCase>();
+        services.AddScoped<UpdateActivityUseCase>();
+        services.AddScoped<DeleteActivityUseCase>();
 
         return services;
     }

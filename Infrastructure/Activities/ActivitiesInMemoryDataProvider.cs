@@ -25,4 +25,26 @@ public sealed class ActivitiesInMemoryDataProvider : IActivityRepository
 
         return Task.FromResult(activity);
     }
+
+    public Task<Activity> UpdateActivityAsync(Guid id, ActivityDataToUpdate data)
+    {
+        var activity = _activities.FirstOrDefault(a => a.Id == id)
+            ?? throw new KeyNotFoundException($"Activity with id {id} not found.");
+
+        activity.Name = data.Name ?? activity.Name;
+        activity.Date = data.Date ?? activity.Date;
+        activity.StartTime = data.StartTime ?? activity.StartTime;
+        activity.EndTime = data.EndTime ?? activity.EndTime;
+
+        return Task.FromResult(activity);
+    }
+
+    public Task DeleteActivityAsync(Guid id)
+    {
+        var activity = _activities.FirstOrDefault(a => a.Id == id)
+            ?? throw new KeyNotFoundException($"Activity with id {id} not found.");
+
+        _activities.Remove(activity);
+        return Task.CompletedTask;
+    }
 }

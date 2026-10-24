@@ -1,5 +1,8 @@
+using Application.Activities;
 using Application.Activities.Createactivity;
 using Application.Activities.GetActivity;
+using Application.Activities.UpdateActivity;
+using Application.Activities.DeleteActivity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers;
@@ -9,7 +12,9 @@ namespace Presentation.Controllers;
 public sealed class ActivitiesController(
     CreateActivityUseCase createActivityUseCase,
     GetActivitiesUseCase getActivitiesUseCase,
-    GetActivityByIdUseCase getActivityByIdUseCase) : ControllerBase
+    GetActivityByIdUseCase getActivityByIdUseCase,
+    UpdateActivityUseCase updateActivityUseCase,
+    DeleteActivityUseCase deleteActivityUseCase) : ControllerBase
 {
     [HttpPost(Name = "CreateActivity")]
     public async Task<IActionResult> CreateActivity([FromBody] ActivityDataRequest request)
@@ -33,6 +38,22 @@ public sealed class ActivitiesController(
         var activity = await getActivityByIdUseCase.ExecuteAsync(activityId);
         return Ok(activity);
     }
+
+    [HttpPatch("{activityId}", Name = "UpdateActivity")]
+    public async Task<IActionResult> UpdateActivity(Guid activityId, [FromBody] ActivityUpdatedDataRequest request)
+    {
+        var activity = await updateActivityUseCase.ExecuteAsync(activityId, new ActivityDataToUpdate(
+            request.Name, request.Date, request.StartTime, request.EndTime));
+    
+        return Ok(activity);
+    }
+
+    [HttpDelete("{activityId}", Name = "DeleteActivity")]
+    public async Task<IActionResult> DeleteActivity(Guid activityId)
+    {
+        await deleteActivityUseCase.ExecuteAsync(activityId);
+        return NoContent();
+    }
 }
 
 public sealed record ActivityDataRequest(
@@ -40,3 +61,9 @@ public sealed record ActivityDataRequest(
     DateOnly Date,
     TimeOnly StartTime,
     TimeOnly EndTime);
+
+public sealed record ActivityUpdatedDataRequest(
+    string? Name,
+    DateOnly? Date,
+    TimeOnly? StartTime,
+    TimeOnly? EndTime);
