@@ -36,6 +36,7 @@ public sealed class ActivitiesInMemoryDataProvider : IActivityRepository
         activity.StartTime = data.StartTime ?? activity.StartTime;
         activity.EndTime = data.EndTime ?? activity.EndTime;
         activity.CategoryId = data.CategoryId ?? activity.CategoryId;
+        activity.IsCompleted = data.IsCompleted ?? activity.IsCompleted;
 
         return Task.FromResult(activity);
     }

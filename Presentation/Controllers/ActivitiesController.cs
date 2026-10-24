@@ -4,6 +4,7 @@ using Application.Activities.GetActivity;
 using Application.Activities.UpdateActivity;
 using Application.Activities.DeleteActivity;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Extensions;
 
 namespace Presentation.Controllers;
 
@@ -42,8 +43,8 @@ public sealed class ActivitiesController(
     [HttpPatch("{activityId}", Name = "UpdateActivity")]
     public async Task<IActionResult> UpdateActivity(Guid activityId, [FromBody] ActivityUpdatedDataRequest request)
     {
-        var activity = await updateActivityUseCase.ExecuteAsync(activityId, new ActivityDataToUpdate(
-            request.Name, request.Date, request.StartTime, request.EndTime, request.CategoryId));
+        var newActivityData = request.ToActivityDataToUpdate();
+        var activity = await updateActivityUseCase.ExecuteAsync(activityId, newActivityData);
     
         return Ok(activity);
     }
@@ -68,4 +69,5 @@ public sealed record ActivityUpdatedDataRequest(
     DateOnly? Date,
     TimeOnly? StartTime,
     TimeOnly? EndTime,
-    Guid? CategoryId);
+    Guid? CategoryId,
+    bool? IsCompleted);

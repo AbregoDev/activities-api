@@ -20,4 +20,5 @@ public sealed record ActivityDataToUpdate(
     DateOnly? Date,
     TimeOnly? StartTime,
     TimeOnly? EndTime,
-    Guid? CategoryId);
+    Guid? CategoryId,
+    bool? IsCompleted);
