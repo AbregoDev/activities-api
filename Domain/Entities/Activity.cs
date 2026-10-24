@@ -4,7 +4,7 @@ public class Activity
 {
     public Guid Id { get; } = Guid.NewGuid();
     public string Name { get; set; }
-    public Category? Category { get; set; }
+    public Guid? CategoryId { get; set; }
     public DateOnly Date { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
@@ -15,7 +15,7 @@ public class Activity
         DateOnly date,
         TimeOnly startTime,
         TimeOnly endTime,
-        Category? category = null)
+        Guid? category = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Task name cannot be empty.", nameof(name));
@@ -27,6 +27,6 @@ public class Activity
         Date = date;
         StartTime = startTime;
         EndTime = endTime;
-        Category = category;
+        CategoryId = category;
     }
 }

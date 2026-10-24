@@ -43,7 +43,7 @@ public sealed class ActivitiesController(
     public async Task<IActionResult> UpdateActivity(Guid activityId, [FromBody] ActivityUpdatedDataRequest request)
     {
         var activity = await updateActivityUseCase.ExecuteAsync(activityId, new ActivityDataToUpdate(
-            request.Name, request.Date, request.StartTime, request.EndTime));
+            request.Name, request.Date, request.StartTime, request.EndTime, request.CategoryId));
     
         return Ok(activity);
     }
@@ -60,10 +60,12 @@ public sealed record ActivityDataRequest(
     string Name,
     DateOnly Date,
     TimeOnly StartTime,
-    TimeOnly EndTime);
+    TimeOnly EndTime,
+    Guid? CategoryId);
 
 public sealed record ActivityUpdatedDataRequest(
     string? Name,
     DateOnly? Date,
     TimeOnly? StartTime,
-    TimeOnly? EndTime);
+    TimeOnly? EndTime,
+    Guid? CategoryId);

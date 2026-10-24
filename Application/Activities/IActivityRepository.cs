@@ -19,4 +19,5 @@ public sealed record ActivityDataToUpdate(
     string? Name,
     DateOnly? Date,
     TimeOnly? StartTime,
-    TimeOnly? EndTime);
+    TimeOnly? EndTime,
+    Guid? CategoryId);
