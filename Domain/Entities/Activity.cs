@@ -8,15 +8,16 @@ public class Activity
     public DateOnly Date { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
-    public bool IsCompleted { get; set; } = false;
+    public bool IsCompleted { get; set; }
 
     public Activity(
         string name,
         DateOnly date,
         TimeOnly startTime,
         TimeOnly endTime,
-        Guid? categoryId = null)
-        : this(Guid.NewGuid(), name, date, startTime, endTime, categoryId)
+        Guid? categoryId = null,
+        bool isCompleted = false)
+        : this(Guid.NewGuid(), name, date, startTime, endTime, categoryId, isCompleted)
     {
     }
 
@@ -26,7 +27,8 @@ public class Activity
         DateOnly date,
         TimeOnly startTime,
         TimeOnly endTime,
-        Guid? categoryId = null)
+        Guid? categoryId = null,
+        bool isCompleted = false)
     {
         if (id == Guid.Empty)
             throw new ArgumentException("Activity ID cannot be empty.", nameof(id));
@@ -43,5 +45,6 @@ public class Activity
         StartTime = startTime;
         EndTime = endTime;
         CategoryId = categoryId;
+        IsCompleted = isCompleted;
     }
 }
