@@ -8,7 +8,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        services.AddSingleton<IActivityRepository, ActivitiesInMemoryDataProvider>();
+        services.AddSingleton<IActivityRepository, ActivitiesFileDataProvider>();
 
         return services;
     }
