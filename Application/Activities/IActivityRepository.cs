@@ -8,6 +8,9 @@ public interface IActivityRepository
 
     Task<IEnumerable<Activity>> GetActivitiesAsync();
 
+    Task<IEnumerable<Activity>> GetActivitiesInRangeAsync(
+        DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken);
+
     Task<Activity> GetActivityByIdAsync(Guid id);
 
     Task<Activity> UpdateActivityAsync(Guid id, ActivityDataToUpdate data);

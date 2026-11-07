@@ -4,6 +4,8 @@ using Application.Activities.GetActivity;
 using Application.Activities.UpdateActivity;
 using Application.Activities.DeleteActivity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Presentation.Contracts;
 using Presentation.Extensions;
 
 namespace Presentation.Controllers;
@@ -13,6 +15,7 @@ namespace Presentation.Controllers;
 public sealed class ActivitiesController(
     CreateActivityUseCase createActivityUseCase,
     GetActivitiesUseCase getActivitiesUseCase,
+    GetActivitiesInRangeUseCase getActivitiesInRangeUseCase,
     GetActivityByIdUseCase getActivityByIdUseCase,
     UpdateActivityUseCase updateActivityUseCase,
     DeleteActivityUseCase deleteActivityUseCase) : ControllerBase
@@ -31,6 +34,33 @@ public sealed class ActivitiesController(
     {
         var activities = await getActivitiesUseCase.ExecuteAsync();
         return Ok(activities);
+    }
+
+    [HttpGet("range", Name = "GetActivitiesInRange")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [ProducesResponseType<ActivityResponse[]>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ActivityResponse[]>> GetActivitiesInRange(
+        [FromQuery, BindRequired] DateOnly startDate,
+        [FromQuery, BindRequired] DateOnly endDate,
+        CancellationToken cancellationToken)
+    {
+        if (startDate > endDate)
+        {
+            ModelState.AddModelError(nameof(endDate), "End date must be on or after start date.");
+            return ValidationProblem(ModelState);
+        }
+
+        var activities = await getActivitiesInRangeUseCase.ExecuteAsync(
+            startDate, endDate, cancellationToken);
+        return Ok(activities.Select(activity => new ActivityResponse(
+            activity.Id,
+            activity.Name,
+            activity.CategoryId,
+            activity.Date,
+            activity.StartTime,
+            activity.EndTime,
+            activity.IsCompleted)).ToArray());
     }
 
     [HttpGet("{activityId}", Name = "GetActivityById")]

@@ -26,6 +26,12 @@ public sealed class ActivitiesInMemoryDataProvider : IActivityRepository
         return Task.FromResult(activity);
     }
 
+    public Task<IEnumerable<Activity>> GetActivitiesInRangeAsync(
+        DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<Activity> UpdateActivityAsync(Guid id, ActivityDataToUpdate data)
     {
         var activity = _activities.FirstOrDefault(a => a.Id == id)

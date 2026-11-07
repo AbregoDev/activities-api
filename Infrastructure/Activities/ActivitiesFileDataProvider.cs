@@ -81,6 +81,27 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
         }
     }
 
+    public async Task<IEnumerable<Activity>> GetActivitiesInRangeAsync(
+        DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken)
+    {
+        await _gate.WaitAsync(cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return _inMemoryActivities
+                .Where(activity => activity.Date >= startDate && activity.Date <= endDate)
+                .OrderBy(activity => activity.Date)
+                .ThenBy(activity => activity.StartTime)
+                .ThenBy(activity => activity.Id)
+                .Select(Copy)
+                .ToArray();
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
     public async Task<Activity> GetActivityByIdAsync(Guid id)
     {
         await _gate.WaitAsync();
