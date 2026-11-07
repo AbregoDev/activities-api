@@ -4,8 +4,8 @@ namespace Application.Activities.UpdateActivity;
 
 public sealed class UpdateActivityUseCase(IActivityRepository repository)
 {
-    public Task<Activity> ExecuteAsync(Guid id, ActivityDataToUpdate data)
+    public Task<Activity> ExecuteAsync(Guid id, ActivityDataToUpdate data, CancellationToken ct)
     {
-        return repository.UpdateActivityAsync(id, data);
+        return repository.UpdateActivityAsync(id, data, ct);
     }
 }

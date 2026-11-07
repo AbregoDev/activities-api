@@ -6,7 +6,7 @@ namespace Infrastructure.Activities;
 
 public sealed class ActivitiesFileDataProvider : IActivityRepository
 {
-    const string FILE_NAME = "App_Data/activities-db.json";
+    const string FILE_NAME = "App_Data/activities-db.json"; 
     private readonly string _filePath = Path.GetFullPath(FILE_NAME);
     private readonly List<Activity> _inMemoryActivities = [];
     private readonly SemaphoreSlim _gate = new(1, 1);
@@ -35,15 +35,16 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
         }
     }
 
-    public async Task<Activity> CreateActivityAsync(Activity activity)
+    public async Task<Activity> CreateActivityAsync(Activity activity, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(activity);
-        await _gate.WaitAsync();
+        await _gate.WaitAsync(ct);
         try
         {
+            ct.ThrowIfCancellationRequested();
             var storedActivity = Copy(activity);
             var activities = new List<Activity>(_inMemoryActivities) { storedActivity };
-            await SaveActivitiesAsync(activities);
+            await SaveActivitiesAsync(activities, ct);
             return Copy(storedActivity);
         }
         finally
@@ -52,15 +53,16 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
         }
     }
 
-    public async Task DeleteActivityAsync(Guid id)
+    public async Task DeleteActivityAsync(Guid id, CancellationToken ct)
     {
-        await _gate.WaitAsync();
+        await _gate.WaitAsync(ct);
         try
         {
+            ct.ThrowIfCancellationRequested();
             var activity = FindActivity(id);
             var activities = new List<Activity>(_inMemoryActivities);
             activities.Remove(activity);
-            await SaveActivitiesAsync(activities);
+            await SaveActivitiesAsync(activities, ct);
         }
         finally
         {
@@ -68,11 +70,12 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
         }
     }
 
-    public async Task<IEnumerable<Activity>> GetActivitiesAsync()
+    public async Task<IEnumerable<Activity>> GetActivitiesAsync(CancellationToken ct)
     {
-        await _gate.WaitAsync();
+        await _gate.WaitAsync(ct);
         try
         {
+            ct.ThrowIfCancellationRequested();
             return _inMemoryActivities.Select(Copy).ToArray();
         }
         finally
@@ -82,12 +85,12 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
     }
 
     public async Task<IEnumerable<Activity>> GetActivitiesInRangeAsync(
-        DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken)
+        DateOnly startDate, DateOnly endDate, CancellationToken ct)
     {
-        await _gate.WaitAsync(cancellationToken);
+        await _gate.WaitAsync(ct);
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            ct.ThrowIfCancellationRequested();
             return _inMemoryActivities
                 .Where(activity => activity.Date >= startDate && activity.Date <= endDate)
                 .OrderBy(activity => activity.Date)
@@ -102,11 +105,12 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
         }
     }
 
-    public async Task<Activity> GetActivityByIdAsync(Guid id)
+    public async Task<Activity> GetActivityByIdAsync(Guid id, CancellationToken ct)
     {
-        await _gate.WaitAsync();
+        await _gate.WaitAsync(ct);
         try
         {
+            ct.ThrowIfCancellationRequested();
             return Copy(FindActivity(id));
         }
         finally
@@ -115,12 +119,16 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
         }
     }
 
-    public async Task<Activity> UpdateActivityAsync(Guid id, ActivityDataToUpdate data)
+    public async Task<Activity> UpdateActivityAsync(
+        Guid id,
+        ActivityDataToUpdate data,
+        CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(data);
-        await _gate.WaitAsync();
+        await _gate.WaitAsync(ct);
         try
         {
+            ct.ThrowIfCancellationRequested();
             var existingActivity = FindActivity(id);
             var activity = Copy(existingActivity);
             activity.Name = data.Name ?? activity.Name;
@@ -133,7 +141,7 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
             var result = Copy(activity);
             var activities = new List<Activity>(_inMemoryActivities);
             activities[activities.IndexOf(existingActivity)] = activity;
-            await SaveActivitiesAsync(activities);
+            await SaveActivitiesAsync(activities, ct);
             return result;
         }
         finally
@@ -148,7 +156,7 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
             ?? throw new KeyNotFoundException($"Activity with id {id} not found.");
     }
 
-    private async Task SaveActivitiesAsync(List<Activity> activities)
+    private async Task SaveActivitiesAsync(List<Activity> activities, CancellationToken ct)
     {
         var temporaryPath = $"{_filePath}.{Guid.NewGuid():N}.tmp";
         try
@@ -157,10 +165,14 @@ public sealed class ActivitiesFileDataProvider : IActivityRepository
                 temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None,
                 bufferSize: 4096, useAsync: true))
             {
-                await JsonSerializer.SerializeAsync(stream, activities.Select(StoredActivity.FromActivity).ToArray());
-                await stream.FlushAsync();
+                await JsonSerializer.SerializeAsync(
+                    stream,
+                    activities.Select(StoredActivity.FromActivity).ToArray(),
+                    cancellationToken: ct);
+                await stream.FlushAsync(ct);
             }
 
+            ct.ThrowIfCancellationRequested();
             File.Move(temporaryPath, _filePath, overwrite: true);
             _inMemoryActivities.Clear();
             _inMemoryActivities.AddRange(activities);

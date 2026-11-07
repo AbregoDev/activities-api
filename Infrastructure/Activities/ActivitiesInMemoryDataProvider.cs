@@ -7,19 +7,22 @@ public sealed class ActivitiesInMemoryDataProvider : IActivityRepository
 {
     private readonly List<Activity> _activities = [];
 
-    public Task<Activity> CreateActivityAsync(Activity activity)
+    public Task<Activity> CreateActivityAsync(Activity activity, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         _activities.Add(activity);
         return Task.FromResult(activity);
     }
 
-    public Task<IEnumerable<Activity>> GetActivitiesAsync()
+    public Task<IEnumerable<Activity>> GetActivitiesAsync(CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         return Task.FromResult<IEnumerable<Activity>>(_activities);
     }
 
-    public Task<Activity> GetActivityByIdAsync(Guid id)
+    public Task<Activity> GetActivityByIdAsync(Guid id, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var activity = _activities.FirstOrDefault(a => a.Id == id)
             ?? throw new KeyNotFoundException($"Activity with id {id} not found.");
 
@@ -27,13 +30,18 @@ public sealed class ActivitiesInMemoryDataProvider : IActivityRepository
     }
 
     public Task<IEnumerable<Activity>> GetActivitiesInRangeAsync(
-        DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken)
+        DateOnly startDate, DateOnly endDate, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         throw new NotImplementedException();
     }
 
-    public Task<Activity> UpdateActivityAsync(Guid id, ActivityDataToUpdate data)
+    public Task<Activity> UpdateActivityAsync(
+        Guid id,
+        ActivityDataToUpdate data,
+        CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var activity = _activities.FirstOrDefault(a => a.Id == id)
             ?? throw new KeyNotFoundException($"Activity with id {id} not found.");
 
@@ -47,8 +55,9 @@ public sealed class ActivitiesInMemoryDataProvider : IActivityRepository
         return Task.FromResult(activity);
     }
 
-    public Task DeleteActivityAsync(Guid id)
+    public Task DeleteActivityAsync(Guid id, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var activity = _activities.FirstOrDefault(a => a.Id == id)
             ?? throw new KeyNotFoundException($"Activity with id {id} not found.");
 

@@ -1,4 +1,3 @@
-using Application.Activities;
 using Application.Activities.Createactivity;
 using Application.Activities.GetActivity;
 using Application.Activities.UpdateActivity;
@@ -21,18 +20,20 @@ public sealed class ActivitiesController(
     DeleteActivityUseCase deleteActivityUseCase) : ControllerBase
 {
     [HttpPost(Name = "CreateActivity")]
-    public async Task<IActionResult> CreateActivity([FromBody] ActivityDataRequest request)
+    public async Task<IActionResult> CreateActivity(
+        [FromBody] ActivityDataRequest request,
+        CancellationToken ct)
     {
         var activity = await createActivityUseCase.ExecuteAsync(
-            request.Name, request.Date, request.StartTime, request.EndTime);
+            request.Name, request.Date, request.StartTime, request.EndTime, ct);
 
         return Created($"/activity/{activity.Id}", activity);
     }
 
     [HttpGet(Name = "GetActivities")]
-    public async Task<IActionResult> GetActivities()
+    public async Task<IActionResult> GetActivities(CancellationToken ct)
     {
-        var activities = await getActivitiesUseCase.ExecuteAsync();
+        var activities = await getActivitiesUseCase.ExecuteAsync(ct);
         return Ok(activities);
     }
 
@@ -43,7 +44,7 @@ public sealed class ActivitiesController(
     public async Task<ActionResult<ActivityResponse[]>> GetActivitiesInRange(
         [FromQuery, BindRequired] DateOnly startDate,
         [FromQuery, BindRequired] DateOnly endDate,
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
         if (startDate > endDate)
         {
@@ -52,7 +53,7 @@ public sealed class ActivitiesController(
         }
 
         var activities = await getActivitiesInRangeUseCase.ExecuteAsync(
-            startDate, endDate, cancellationToken);
+            startDate, endDate, ct);
         return Ok(activities.Select(activity => new ActivityResponse(
             activity.Id,
             activity.Name,
@@ -64,25 +65,32 @@ public sealed class ActivitiesController(
     }
 
     [HttpGet("{activityId}", Name = "GetActivityById")]
-    public async Task<IActionResult> GetActivityById(Guid activityId)
+    public async Task<IActionResult> GetActivityById(
+        Guid activityId,
+        CancellationToken ct)
     {
-        var activity = await getActivityByIdUseCase.ExecuteAsync(activityId);
+        var activity = await getActivityByIdUseCase.ExecuteAsync(activityId, ct);
         return Ok(activity);
     }
 
     [HttpPatch("{activityId}", Name = "UpdateActivity")]
-    public async Task<IActionResult> UpdateActivity(Guid activityId, [FromBody] ActivityUpdatedDataRequest request)
+    public async Task<IActionResult> UpdateActivity(
+        Guid activityId,
+        [FromBody] ActivityUpdatedDataRequest request,
+        CancellationToken ct)
     {
         var newActivityData = request.ToActivityDataToUpdate();
-        var activity = await updateActivityUseCase.ExecuteAsync(activityId, newActivityData);
-    
+        var activity = await updateActivityUseCase.ExecuteAsync(activityId, newActivityData, ct);
+
         return Ok(activity);
     }
 
     [HttpDelete("{activityId}", Name = "DeleteActivity")]
-    public async Task<IActionResult> DeleteActivity(Guid activityId)
+    public async Task<IActionResult> DeleteActivity(
+        Guid activityId,
+        CancellationToken ct)
     {
-        await deleteActivityUseCase.ExecuteAsync(activityId);
+        await deleteActivityUseCase.ExecuteAsync(activityId, ct);
         return NoContent();
     }
 }
