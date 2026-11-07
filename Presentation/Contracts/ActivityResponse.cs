@@ -1,3 +1,5 @@
+using Domain.Entities;
+
 namespace Presentation.Contracts;
 
 public sealed record ActivityResponse(
