@@ -1,6 +1,4 @@
-using Domain.Entities;
-
-namespace Presentation.Contracts;
+namespace Presentation.Contracts.Activities;
 
 public sealed record ActivityResponse(
     Guid Id,

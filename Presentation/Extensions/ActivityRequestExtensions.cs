@@ -1,11 +1,11 @@
 using Application.Activities;
-using Presentation.Controllers;
+using Presentation.Contracts.Activities;
 
 namespace Presentation.Extensions;
 
 public static class ActivityRequestExtensions
 {
-    public static ActivityDataToUpdate ToActivityDataToUpdate(this ActivityUpdatedDataRequest request)
+    public static ActivityDataToUpdate ToActivityDataToUpdate(this UpdateActivityRequest request)
     {
         return new ActivityDataToUpdate(
             request.Name,
