@@ -12,7 +12,7 @@ public static class DependencyInjection
     {
         services.AddScoped<CreateActivityUseCase>();
         services.AddScoped<GetActivitiesUseCase>();
-        services.AddScoped<GetActivitiesInRangeUseCase>();
+        services.AddScoped<GetActivitiesByMonthUseCase>();
         services.AddScoped<GetActivityByIdUseCase>();
         services.AddScoped<UpdateActivityUseCase>();
         services.AddScoped<DeleteActivityUseCase>();

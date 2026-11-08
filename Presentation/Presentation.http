@@ -1,6 +1,29 @@
 @Presentation_HostAddress = http://localhost:5075
 
-GET {{Presentation_HostAddress}}/weatherforecast/
+### Get activities for November (months are 1-12; years are 1-9999)
+GET {{Presentation_HostAddress}}/api/activities/GetActivitiesByMonth?year=2026&month=11
+Accept: application/json
+
+### Leap-year February
+GET {{Presentation_HostAddress}}/api/activities/GetActivitiesByMonth?year=2028&month=2
+Accept: application/json
+
+### December and January are separate calendar months
+GET {{Presentation_HostAddress}}/api/activities/GetActivitiesByMonth?year=2026&month=12
 Accept: application/json
 
 ###
+GET {{Presentation_HostAddress}}/api/activities/GetActivitiesByMonth?year=2027&month=1
+Accept: application/json
+
+### Maximum supported year and month
+GET {{Presentation_HostAddress}}/api/activities/GetActivitiesByMonth?year=9999&month=12
+Accept: application/json
+
+### Invalid month: 400 ValidationProblemDetails
+GET {{Presentation_HostAddress}}/api/activities/GetActivitiesByMonth?year=2026&month=0
+Accept: application/json
+
+### Missing year: 400 ValidationProblemDetails
+GET {{Presentation_HostAddress}}/api/activities/GetActivitiesByMonth?month=11
+Accept: application/json

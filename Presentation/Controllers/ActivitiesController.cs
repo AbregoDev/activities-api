@@ -2,6 +2,7 @@ using Application.Activities.Createactivity;
 using Application.Activities.GetActivity;
 using Application.Activities.UpdateActivity;
 using Application.Activities.DeleteActivity;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Presentation.Contracts.Activities;
@@ -14,7 +15,7 @@ namespace Presentation.Controllers;
 public sealed class ActivitiesController(
     CreateActivityUseCase createActivityUseCase,
     GetActivitiesUseCase getActivitiesUseCase,
-    GetActivitiesInRangeUseCase getActivitiesInRangeUseCase,
+    GetActivitiesByMonthUseCase getActivitiesByMonthUseCase,
     GetActivityByIdUseCase getActivityByIdUseCase,
     UpdateActivityUseCase updateActivityUseCase,
     DeleteActivityUseCase deleteActivityUseCase) : ControllerBase
@@ -37,23 +38,18 @@ public sealed class ActivitiesController(
         return Ok(activities.Select(activity => activity.ToActivityResponse()).ToArray());
     }
 
-    [HttpGet("range", Name = "GetActivitiesInRange")]
+    [HttpGet("GetActivitiesByMonth", Name = "GetActivitiesByMonth")]
+    [EndpointSummary("Get activities for a calendar month")]
+    [EndpointDescription("Returns activities ordered by date, start time, and ID. Month is 1-indexed (1-12).")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ProducesResponseType<ActivityResponse[]>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<ActivityResponse[]>> GetActivitiesInRange(
-        [FromQuery, BindRequired] DateOnly startDate,
-        [FromQuery, BindRequired] DateOnly endDate,
+    public async Task<ActionResult<ActivityResponse[]>> GetActivitiesByMonth(
+        [FromQuery, BindRequired, Range(1, 9999)] int year,
+        [FromQuery, BindRequired, Range(1, 12)] int month,
         CancellationToken ct)
     {
-        if (startDate > endDate)
-        {
-            ModelState.AddModelError(nameof(endDate), "End date must be on or after start date.");
-            return ValidationProblem(ModelState);
-        }
-
-        var activities = await getActivitiesInRangeUseCase.ExecuteAsync(
-            startDate, endDate, ct);
+        var activities = await getActivitiesByMonthUseCase.ExecuteAsync(year, month, ct);
         return Ok(activities.Select(activity => activity.ToActivityResponse()).ToArray());
     }
 
